@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <h1>GitHub Repos with oppen issues</h1>
+    <title>GitHub Repos</title>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+</head>
+<style>
+    .color {
+        color: red;
+    }
+
+    .m-t {
+        margin-top: 2%;
+    }
+</style>
+
+<body>
+    GitHub User:<br />
+    <input type="text" id="username" value="mjackson" /><br />
+    <button class="m-t" onclick="loadReposFetch()">Get Repos</button>
+    <div id="repos">
+    </div>
+    <script>
+        function loadReposFetch() {
+            let url = "https://api.github.com/users/" +
+                $("#username").val() + "/repos";
+            fetch(url, {
+                method: 'GET',
+            })
+                .then((response) => response.json())
+                .then((result) => {
+                    displayRepos_new(result);
+                    console.log('Success:', result);
+                })
+                .catch((error) => {
+                    displayError(result);
+                    console.error('Error:', error);
+                });
+        }
+
+        function displayRepos_new(respos) {
+            $("#repos").empty();
+            if (respos.length > 0) {
+                var isExistOpen = respos.filter(function (currRepo) { return currRepo.open_issues > 0 });
+                if (isExistOpen.length > 0) {
+                    for (let repo of isExistOpen) {
+                        $("#repos").append($("<li id=" + repo.id + ">").append(repo.name + ": " + repo.open_issues))
+                    }
+                    const max = isExistOpen.reduce(function (prev, current) {
+                        return (prev.open_issues > current.open_issues) ? prev : current
+                    })
+                    $("#" + max.id).addClass('color');
+
+                } else {
+                    $("#repos").append("There are no open issues");
+                }
+            }
+            else {
+                $("#repos").append("No repos found");
+            }
+        }
+        function displayError(err) {
+            $("#repos").append($("Server Error"));
+        }
+    </script>
+</body>
+
+</html>
